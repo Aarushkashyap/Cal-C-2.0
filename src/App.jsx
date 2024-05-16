@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import Switch from './components/Switch'
+import Calculator from './components/Calculator';
 
 const App = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -24,6 +25,7 @@ const App = () => {
             onClick={handleChange}
             />
             </div>
+            <Calculator/>
         </div>
     </div>
   )
