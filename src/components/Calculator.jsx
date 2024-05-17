@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { PiArrowUUpLeftBold, PiPlusMinus } from "react-icons/pi";
 import { FiPercent } from "react-icons/fi";
-import { FaPercent, FaDivide, FaMinus, FaPlus,FaEquals } from "react-icons/fa6";
+import { FaDivide, FaMinus, FaPlus,FaEquals } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
 import { LuDot } from "react-icons/lu";
 import Button from './Button';
@@ -82,6 +82,7 @@ const Buttons = {
 
 const Calculator = () => {
     const buttonsRef = useRef([]);
+    const backspaceBtnRef = useRef(null);
     const [inputValue, setInputValue] = useState ([]);
     const [result, setResult] = useState(0);
 
@@ -175,8 +176,12 @@ const Calculator = () => {
                     setInputValue((prev) => [...prev, newInputValue]);
                 }
             }
-
             
+            // function handle clear
+            const handleClear = () => {
+                setInputValue([]);
+            }
+             
  
         switch  (button.type){
             case "number":
@@ -193,11 +198,79 @@ const Calculator = () => {
                 break; 
             case "dot":
                 handleDot();
-                break;       
+                break;     
+            case "clear":
+                handleClear();
+                break;      
                 }
     };
 
-   
+    const handleKeyButtonPress = (btn) => {
+        buttonsRef.current[btn].click();
+        // add a click animation 
+        buttonsRef.current[btn].classList.add("ring-2", "ring-purple-400");
+        //remove after 2ms
+        setTimeout(() => {
+            buttonsRef.current[btn].classList.remove("ring-2", "ring-purple-400");
+        }, 200);
+    };
+
+    const handleKeyPress = (e) => {
+        if(buttonsRef.current[e.key]) {
+            // if pressed key is from buttons
+            handleKeyButtonPress(e.key);
+        }
+
+        // if backspace pressed 
+        if(e.key === "Backspace") {
+            // handleBackSpace
+            backspaceBtnRef.current && backspaceBtnRef.current.click();
+        }
+    }
+
+    useEffect(() => {
+        document.addEventListener("keydown", handleKeyPress);
+        return () => {
+            document.removeEventListener("keydown", handleKeyPress); 
+        };
+    }, []);
+    
+
+    const handleBackSpace = () => {
+        if(inputValue.length > 0) {
+            const lastInputValue = inputValue[inputValue.length -1];
+            if(lastInputValue.type === "number" && lastInputValue.value.toString().length > 1){
+                // if last value is number and more than 1 character only remove last character from last value
+                const newInputValue = {
+                    ... lastInputValue,
+                    value: lastInputValue.value.slice(0, -1),
+                    label: lastInputValue.value.slice(0, -1),
+                };
+                // Update value
+                setInputValue ((prev) => [... prev.slice(0, -1), newInputValue]);
+            } else {
+                // else remove whole last value 
+                setInputValue((prev) => [...prev.slice(0, -1)])
+            }
+        }
+        }
+
+
+   const renderInputValue = () => {
+    // if input value is empty just return 0
+    if (!inputValue.length) return <span>0</span>;
+        // else map input value
+    return inputValue.map((item, index) => {
+        return item.type === "number" ? (
+            <span key={index}>{item.label}</span>
+        ) : (
+            //if it is operator add class primary
+            <span key={index} className='text-primary'> 
+                {item.label} 
+            </span>
+            );
+        });
+   };
 
   return (
     <>
@@ -209,18 +282,14 @@ const Calculator = () => {
         </div>
     </div>
     <div className='flex items-center justify-center bg-light-100 px-4 py-2 dark:bg-dark-100'>
-            <span className='mr-3 cursor-pointer hover:text-black dark:hover:text-white'>
+            <span className='mr-3 cursor-pointer hover:text-black dark:hover:text-white'
+                ref={backspaceBtnRef}
+                onClick={handleBackSpace}
+            >
             <PiArrowUUpLeftBold size={20} />
             </span>
             <div className='flex w-full item-center overflow-x-auto text-2xl font-extralight [&>*:first-child]:ml-auto'>
-            {inputValue.map((item, index) => {
-                return item.type === "number" ? (
-                    <span>{item.label}</span>
-                ) : (
-                    //it its operator add clasee primary
-                    <span className='text-primary'>{item.label}</span>
-                )
-            })}
+                {renderInputValue()}
             </div>
         </div>
         {/* keyboard */}
@@ -234,7 +303,7 @@ const Calculator = () => {
                                 key={item.value}
                                 className={"w-full" + " " + item.className || ""}
                                 ref ={(button) => {
-                                    buttonsRef.current[item.value] === button;
+                                    buttonsRef.current[item.value] = button;
                                 }}
                                 onClick={() => handleButtonClick(item.value)}
                                >{item.label}</Button>
