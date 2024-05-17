@@ -152,6 +152,32 @@ const Calculator = () => {
                 }
             };
 
+            // function to handle dot
+            const handleDot = () => {
+                if(lastInputValue && lastInputValue.type === "number"){
+                    // if last value is number add dot
+                    let newValue = lastInputValue.value;
+                    if(!lastInputValue.value.includes(".")) {
+                        // if dot not already exists add one 
+                        newValue = lastInputValue.value + ".";
+                    }
+                    const newInputValue = {
+                        ... lastInputValue,
+                        value: newValue,
+                        label: newValue,
+                    };
+                    // update value
+                    setInputValue((prev) => [...prev.slice(0, -1), newInputValue]);
+                }
+                else if(!lastInputValue || lastInputValue.type !== "number" ){
+                    // if there is no last value or it is not a number
+                    const newInputValue = {value:"0.", label: "0.", type: "number"};
+                    setInputValue((prev) => [...prev, newInputValue]);
+                }
+            }
+
+            
+ 
         switch  (button.type){
             case "number":
                 handleNumber()
@@ -159,7 +185,16 @@ const Calculator = () => {
             case "operator": 
                 handleOperator();
                 break;
-            }
+            case "plusminus":
+                handleUnaryOperations((num) => -num );
+                break;
+            case "percent":
+                handleUnaryOperations((num) => num/100);
+                break; 
+            case "dot":
+                handleDot();
+                break;       
+                }
     };
 
    
@@ -178,9 +213,14 @@ const Calculator = () => {
             <PiArrowUUpLeftBold size={20} />
             </span>
             <div className='flex w-full item-center overflow-x-auto text-2xl font-extralight [&>*:first-child]:ml-auto'>
-            {inputValue.map((item, index) => (
-                <span>{item.label}</span>
-            ))}
+            {inputValue.map((item, index) => {
+                return item.type === "number" ? (
+                    <span>{item.label}</span>
+                ) : (
+                    //it its operator add clasee primary
+                    <span className='text-primary'>{item.label}</span>
+                )
+            })}
             </div>
         </div>
         {/* keyboard */}
