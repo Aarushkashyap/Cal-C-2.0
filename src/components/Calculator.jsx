@@ -75,7 +75,7 @@ const Buttons = {
             value: "=",
             label: <FaEquals size={25} />,
             className: "!bg-primary text-white",
-            type:"number",
+            type:"equal",
         },
     ],
 };
@@ -85,16 +85,35 @@ const Calculator = () => {
     const backspaceBtnRef = useRef(null);
     const [inputValue, setInputValue] = useState ([]);
     const [result, setResult] = useState(0);
+    const [calculated, setCalculated] = useState(false);
 
     const handleButtonClick = (value) => {
+
+        // if value calculated 
+        if(calculated && value !== "=") {
+            setInputValue([]);
+            setResult(0);
+            setCalculated(false);
+        }
+
         //Get all the clicked button detailId from buttons array
         const button = Object.values(Buttons)
         .flat()
         .find((item) => item.value === value);
 
+        // if value calculated add current result as lastInputValue
+        
+        let resultValue;
+        if(calculated){
+            // if result value is too big we will convert it to scientific notation so convert it back to number then a string
+            resultValue = BigInt(result).toString();
+        }
+
         // we will store input values in an array
         // get the last element of the array
-        const lastInputValue = inputValue[inputValue.length - 1];
+        const lastInputValue = calculated ? 
+        {value:resultValue, label:resultValue, type:"number"}
+        :inputValue[inputValue.length - 1];
 
         // function to handle unary operations
         const handleUnaryOperations = (operation) => {
@@ -148,7 +167,11 @@ const Calculator = () => {
                     }
                     else {
                         // if last value is not operator than add operator
-                        setInputValue((prev) => [ ... prev, button]);
+                        setInputValue((prev) => [ 
+                            ... prev.slice(0, -1), 
+                            lastInputValue, 
+                            button
+                        ]);
                     }
                 }
             };
@@ -180,9 +203,17 @@ const Calculator = () => {
             // function handle clear
             const handleClear = () => {
                 setInputValue([]);
+                setResult(0);
+                setCalculated(false);
             }
              
  
+            const handleEqual = () => {
+                if(inputValue.length > 0){
+                    calculate();
+                }
+            }
+
         switch  (button.type){
             case "number":
                 handleNumber()
@@ -201,7 +232,10 @@ const Calculator = () => {
                 break;     
             case "clear":
                 handleClear();
-                break;      
+                break;  
+            case "equal":
+                handleEqual();
+                break;    
                 }
     };
 
@@ -225,6 +259,11 @@ const Calculator = () => {
         if(e.key === "Backspace") {
             // handleBackSpace
             backspaceBtnRef.current && backspaceBtnRef.current.click();
+        }
+
+        if(e.key === "Enter") {
+            // enter key 
+            handleKeyButtonPress("=");
         }
     }
 
@@ -255,6 +294,41 @@ const Calculator = () => {
         }
         }
 
+    const calculate = () => {
+        const inputValueToCalculate = [ ...inputValue];
+        const lastInputValue = inputValueToCalculate[inputValueToCalculate.length - 1];
+
+        // if there is an operator in last remove it
+        if(lastInputValue && lastInputValue.type === "operator") {
+            inputValueToCalculate.pop();
+            setInputValue(inputValueToCalculate);
+        }
+
+        // create expression from input value 
+        const expression = inputValueToCalculate.map((item) => {
+            // remove leading zeroes
+            if (item.type === "number") {
+                return Number(item.value);
+            }
+            return item.value;
+        })
+        .join("");
+
+        // solve the expression
+        try {
+            const newResult = eval(expression);
+            if(isNaN(newResult) || !isFinite(newResult)){
+                // if not a number
+                throw new Error ("invalid Expression");
+            }
+
+            setResult(newResult);
+            setCalculated(true);
+
+        } catch (error) {  
+            console.log(error);
+        }
+    };
 
    const renderInputValue = () => {
     // if input value is empty just return 0
