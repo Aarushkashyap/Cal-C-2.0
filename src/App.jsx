@@ -16,8 +16,8 @@ const App = () => {
         dark:bg-background dark:text-text sm:min-h-[40rem] sm:w-[340px] sm:rounded-[45px] sm:border-[8px]
         sm:shadow-2xl' >
             <div className='px-4 mb-4'>
-            <Switch 
             
+            <Switch 
             options={["calculator", "convertor", //"others" for future work
 
             ]}

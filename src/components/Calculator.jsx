@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { PiArrowUUpLeftBold, PiPlusMinus } from "react-icons/pi";
 import { FiPercent } from "react-icons/fi";
-import { FaDivide, FaMinus, FaPlus,FaEquals } from "react-icons/fa6";
+import { FaDivide, FaMinus, FaPlus,FaEquals, FaClockRotateLeft } from "react-icons/fa6";
 import { RxCross2 } from "react-icons/rx";
 import { LuDot } from "react-icons/lu";
 import Button from './Button';
+import NumericFormat from './NumericFormat';
 
 
 const Buttons = {
@@ -86,6 +87,7 @@ const Calculator = () => {
     const [inputValue, setInputValue] = useState ([]);
     const [result, setResult] = useState(0);
     const [calculated, setCalculated] = useState(false);
+    const [history, setHistory] = useState([]);
 
     const handleButtonClick = (value) => {
 
@@ -265,6 +267,10 @@ const Calculator = () => {
             // enter key 
             handleKeyButtonPress("=");
         }
+
+        if(e.key === "ArrowUp") {
+            history.length > 1 && handleRestoreHistory(history[history.length - 1]);
+        }
     }
 
     useEffect(() => {
@@ -324,11 +330,27 @@ const Calculator = () => {
 
             setResult(newResult);
             setCalculated(true);
+            setHistory((prev) => [
+                ... prev, 
+                {
+                    inputValue,
+                    result: newResult,
+                }
+            ])
 
         } catch (error) {  
             console.log(error);
         }
     };
+
+    const handleRestoreHistory = (historyItem) => {
+        // restore all values
+        setInputValue(historyItem.inputValue);
+        setResult(historyItem.result);
+        setCalculated(true);
+        // remove last item from history
+        setHistory((prev)=> prev.slice(0, -1))
+    }
 
    const renderInputValue = () => {
     // if input value is empty just return 0
@@ -336,7 +358,8 @@ const Calculator = () => {
         // else map input value
     return inputValue.map((item, index) => {
         return item.type === "number" ? (
-            <span key={index}>{item.label}</span>
+            //  lets formate the long numbers with thousand separator
+            <NumericFormat key={index} value={item.value}/>
         ) : (
             //if it is operator add class primary
             <span key={index} className='text-primary'> 
@@ -349,10 +372,41 @@ const Calculator = () => {
   return (
     <>
     <div className='mb-2 px-4'>
+
+
         <div className='flex min-h-[9rem] flex-col items-end justify-end py-4 text-right'>
-            <span className='w-full text-6xl text-textDark dark:text-white'>
-                {result}
-            </span>
+               {/* render history */}
+            {
+                history.length>1 && (
+                    <div className='mb-4 flex cursor-pointer items-center gap-2 rounded-full bg-light-200 
+                    px-2 py-0.5 text-xs dark:bg-dark-300'
+                        onClick={() => 
+                        handleRestoreHistory(
+                            history[history.length-2] || history[history.length-1]
+                        )
+                    }
+                        >  
+                        <FaClockRotateLeft size={15}/>
+                        <NumericFormat 
+                        value = {
+                            history[history.length -2].result ||
+                            history[history.length -1].result
+                        }
+                        />
+                    </div>
+                )
+            }
+            <NumericFormat 
+            value={result}
+            className='w-full text-6xl text-textDark dark:text-white' 
+            maxLimit={20}
+            autoTextSize={{
+                mode:"oneline",
+                minFontSize: 20,
+                maxFontSize: 50,
+            }}
+            />
+                
         </div>
     </div>
     <div className='flex items-center justify-center bg-light-100 px-4 py-2 dark:bg-dark-100'>
