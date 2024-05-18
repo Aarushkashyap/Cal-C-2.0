@@ -20,7 +20,7 @@ const App = () => {
             <div className='px-4 mb-4'>
             <ThemeSwitch/>
             <Switch 
-            options={["calculator", //"convertor", //"others" for future work
+            options={["calculator", "convertor", //"others" for future work
 
             ]}
             selectedIndex={selectedIndex}
