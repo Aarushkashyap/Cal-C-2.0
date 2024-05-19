@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import Switch from './components/Switch'
 import Calculator from './components/Calculator';
 import ThemeSwitch from './components/ThemeSwitch';
-
 const App = () => {
     const [selectedIndex, setSelectedIndex] = useState(0);
 
