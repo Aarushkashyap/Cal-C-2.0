@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import Switch from './components/Switch'
 import Calculator from './components/Calculator';
 import ThemeSwitch from './components/ThemeSwitch';
+import Converter from './components/Convertor';
 const App = () => {
-    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedIndex, setSelectedIndex] = useState(1);
 
     const handleChange = (index) => {
         setSelectedIndex(index)
@@ -25,7 +26,9 @@ const App = () => {
             onClick={handleChange}
             />
             </div>
-            <Calculator/>
+            {
+              selectedIndex === 0 ? <Calculator/> : <Converter/>
+            }
         </div>
     </div>
   )
