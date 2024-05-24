@@ -1,4 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
+import { IoIosSwap } from "react-icons/io";
+import { LuDot } from "react-icons/lu";
+import { MdKeyboardBackspace } from "react-icons/md";
+import Button from './Button';
+
 
 const convertors = [
     {
@@ -291,11 +296,6 @@ const convertors = [
         units: [
             {
                 name: "Bit",
-                value: 0.000001,
-                unit: "B",
-            },
-            {
-                name: "Bit",
                 value: 0.000000125,
                 unit: "b",
             },
@@ -397,49 +397,152 @@ const convertors = [
         ],
     },
     {
-        name: "Pressure",
+        name:"Pressure",
         units: [
             {
                 name: "Pascal",
                 value: 1,
-                units: "Pa",
+                unit: "Pa",
             },
             {
                 name: "Kilopascal",
                 value: 1000,
-                units: "kPa",
+                unit: "kPa",
             },
             {
                 name: "Bar",
                 value: 100000,
-                units: "bar",
+                unit: "bar",
             },
             {
                 name: "Pound per square Inch",
                 value: 6894.757293168,
-                units: "psi",
+                unit: "psi",
             },
             {
                 name: "Atmosphere",
                 value: 101325,
-                units: "atm",
+                unit: "atm",
             },
             {
                 name: "Torr",
                 value: 133.3223684,
-                units: "torr",
+                unit: "torr",
             },
         ],
     },
 ]
 
+const Buttons = {
+    row1: [
+        {
+            value: "AC",
+            label: "AC",
+            className: "bg-light-300 dark:bg-dark-300 flex-1 !h-[60px]",
+            type: "clear",
+        },
+        {
+            value: "swap",
+            label: <IoIosSwap size={25}/>,
+            className: "bg-light-300 dark:bg-dark-300 flex-1 !h-[60px]",
+            type: "swap",
+        },
+    ],
+    row2: [
+        {value: "7", label: "7", type: "number"},
+        {value: "8", label: "8", type: "number"},
+        {value: "9", label: "9", type: "number"},
+    ],
+    row3: [
+        {value: "4", label: "4", type: "number"},
+        {value: "5", label: "5", type: "number"},
+        {value: "6", label: "6", type: "number"},
+    ],
+    row4: [
+        {value: "1", label: "1", type: "number"},
+        {value: "2", label: "2", type: "number"},
+        {value: "3", label: "3", type: "number"},
+    ],
+    row5: [
+        {value: "0", label: "0", type: "number"},
+        {value: ".", label: <LuDot size={25} />, type: "dot"},
+        {
+            value: "Backspace",
+            label: <MdKeyboardBackspace size={25}/>,
+            type: "Backspace",
+        }
+    ]
+}
 
 const Converter = () => {
-  return (
+
+
+    const [selectedConverter, setSelectedConverter] = useState(0);
+    const [selectedUnits, setSelectedUnits] = useState([
+        convertors[selectedConverter].units[0],
+        convertors[selectedConverter].units[1],
+    ]);
+        const [values, setValues] = useState([0, 0]);
+        const [focusedInput, setFocusedInput] = useState(0);
+
+        const handleConverterChange = (index) => {
+            setSelectedConverter(index);
+            setSelectedUnits (
+                [convertors[index].units[0],
+                convertors[index].units[1]]
+            );
+            setValues([0,0]);
+        }
+
+        const handleUnitChange = (index, unitIndex) => {
+            // handle unit change 
+            let prevSelectedUnits = [...selectedUnits];
+            // update selected unit
+            prevSelectedUnits[index] = convertors[selectedConverter].units[unitIndex]
+            setSelectedUnits(prevSelectedUnits);
+
+            let value = (values[index] * selectedUnits[index].value) / prevSelectedUnits[index].value;
+
+            if(value.toString().split(".")[0]?.length >8) {
+                value = value.toFixed(2)
+            }
+            value = value || 0;
+            let prevValues = [...values]
+            prevValues[index] = value;
+            setValues(prevValues);
+        }
+
+        const handleValueChange = (index, value) => {
+            value = parseFloat(value);
+            let prevValues = [...values];
+
+            // update change value
+
+            prevValues[index] = value;
+
+            // update other value
+            let otherValue = (value * selectedUnits[index].value) / selectedUnits[1-index].value;
+
+            // limit decimal places
+            if(otherValue.toString().split(".")?.length > 8) {
+                otherValue = otherValue.toFixed(2);
+            }
+
+            // if no other value set it to 0
+            otherValue = otherValue || 0;
+
+            prevValues[1-index] = otherValue;
+            setValues(prevValues);
+        }
+
+    return (
     <div className='w-full '>
       <div className='m-auto mb-8 w-max'>
         <select className='border-none bg-transparent text-sm outline-none focus:text-black 
-        dark:focus:text-white'>
+        dark:focus:text-white'
+            defaultValue={selectedConverter}
+            onChange={(e)=> handleConverterChange(e.target.value)}
+        >
             {
                 convertors.map((convertor, index) => (
                     <option 
@@ -449,10 +552,105 @@ const Converter = () => {
                     >
                         {convertor.name}
                     </option>
-                ))
-            }
+                ))}
         </select>
       </div>
+            <div className="min-h-[154px] px-4">
+                <div className='mb-5 flex items-center gap-5'>
+                    <input 
+                    type="number" 
+                    className={`w-full border-b border-dashed bg-transparent p-1 text-4xl
+                    font-light outline-none dark:text-white
+                    ${focusedInput === 0 
+                        ? "border-black dark:border-white" 
+                        : "border-light-300 dark:border-dark-300"
+
+                    }
+                    `} 
+                    placeholder='0'
+                    value={values[0]}
+                    readOnly
+                    onChange={(e) => handleValueChange(0, e.target.value)}
+                    onClick={() => setFocusedInput(0)}
+                    />
+                        <select className='border-none bg-transparent text-sm outline-none focus:text-black
+                         dark:focus:text-white' 
+                         
+                            defaultValue={0}
+                            onChange={(e)=> handleUnitChange(0, e.target.value)}
+                         
+                         >
+                            {convertors[selectedConverter].units.map((unit, index) => (
+                                <option 
+                                    key={index}
+                                    value={index}
+                                    className='bg-light-100 dark:bg-dark-100'
+                                    >
+                                        {unit.unit}
+                                    </option>
+                                ))
+                            }
+                         </select>
+                </div> 
+                <div className=' flex items-center gap-5'>
+                    <input 
+                    type="number" 
+                    className={`w-full border-b border-dashed bg-transparent p-1 text-4xl
+                    font-light outline-none dark:text-white
+                    ${focusedInput === 1 
+                        ? "border-black dark:border-white" 
+                        : "border-light-300 dark:border-dark-300"
+
+                    }
+                    `} 
+                    placeholder='0'
+                    value={values[1]}
+                    readOnly
+                    onChange={(e) => handleValueChange(1, e.target.value)}
+                    onClick={() => setFocusedInput(1)}
+                    />
+                        <select className='border-none bg-transparent text-sm outline-none focus:text-black
+                         dark:focus:text-white' 
+                         
+                            defaultValue={1}
+                            onChange={(e)=> handleUnitChange(1, e.target.value)}
+                         
+                         >
+                            {convertors[selectedConverter].units.map((unit, index) => (
+                                <option 
+                                    key={index}
+                                    value={index}
+                                    className='bg-light-100 dark:bg-dark-100'
+                                    >
+                                        {unit.unit}
+                                    </option>
+                                ))
+                            }
+                         </select>
+                </div>
+            </div>
+
+            {/* keyboard */}
+            <div className='flex items-center justify-between p-4'>
+                <div className='flex w-full flex-col gap-1 rounded-lg'>
+                    {
+                        Object.keys(Buttons).map((key) => (
+                            <div className='flex gap-1 key={key}'>
+                                {
+                                    Buttons[key].map((item) => (
+                                        <Button
+                                            key={item.value}
+                                            className={"w-full" + " " + item.className || ""}
+                                        >
+                                            {item.label}
+                                        </Button>
+                                    ))
+                                }
+                            </div>
+                        ))
+                    }
+                </div>
+            </div>
     </div>
   )
 }
