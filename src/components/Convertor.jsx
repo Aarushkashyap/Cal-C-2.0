@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { IoIosSwap } from "react-icons/io";
+import { AiOutlineSwap } from "react-icons/ai";
 import { LuDot } from "react-icons/lu";
 import { IoBackspaceOutline } from "react-icons/io5";
 import Button from './Button';
@@ -443,7 +443,7 @@ const Buttons = {
         },
         {
             value: "swap",
-            label: <IoIosSwap size={25}/>,
+            label: <AiOutlineSwap size={25}/>,
             className: "bg-light-300 dark:bg-dark-300 flex-1 !h-[60px]",
             type: "swap",
         },
