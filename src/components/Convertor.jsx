@@ -1,7 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { IoIosSwap } from "react-icons/io";
 import { LuDot } from "react-icons/lu";
-import { MdKeyboardBackspace } from "react-icons/md";
+import { IoBackspaceOutline } from "react-icons/io5";
 import Button from './Button';
 
 
@@ -468,7 +468,7 @@ const Buttons = {
         {value: ".", label: <LuDot size={25} />, type: "dot"},
         {
             value: "Backspace",
-            label: <MdKeyboardBackspace size={25}/>,
+            label: <IoBackspaceOutline  size={25}/>,
             type: "Backspace",
         }
     ]
@@ -484,7 +484,7 @@ const Converter = () => {
     ]);
         const [values, setValues] = useState([0, 0]);
         const [focusedInput, setFocusedInput] = useState(0);
-
+        const buttonsRef = useRef([]);
         const handleConverterChange = (index) => {
             setSelectedConverter(index);
             setSelectedUnits (
@@ -534,6 +534,85 @@ const Converter = () => {
             prevValues[1-index] = otherValue;
             setValues(prevValues);
         }
+
+        const handleSwapValues = () => {
+            let prevValues = [...values];
+            prevValues.reverse();
+            setValues(prevValues);
+            // let prevSelectedUnits = [...selectedUnits];
+            // prevSelectedUnits.reverse();
+            // setSelectedUnits(prevSelectedUnits);
+        }
+
+        const handleButtonClick = (value) => {
+            let prevValues = [...values];
+            switch(value) {
+                case "AC":
+                    prevValues = [0,0];
+                    break;
+                case "swap":
+                    handleSwapValues();
+                    break;
+                case "Backspace":
+                    // remove last character from focused input 
+                    prevValues[focusedInput] = (prevValues[focusedInput]+ "").slice(0, -1) || 0;  
+                    // if last character is dot remove it also
+                    if(prevValues[focusedInput].toString().slice(-1)==="."){
+                        prevValues[focusedInput]=(prevValues[focusedInput]+"").slice(
+                            0, 
+                            -1
+                        );
+                    }       
+                    break;  
+                case "." : 
+                    if(!prevValues[focusedInput].toString().includes(".")) {
+                        // if dot not already exists add one
+                        prevValues[focusedInput] += ".";
+                    }
+                    break;
+                default:
+                    prevValues[focusedInput] += value;
+                    prevValues[focusedInput] = prevValues[focusedInput] || 0;
+                    break;
+            }
+
+            if(value != "swap"){
+                setValues(prevValues);
+                handleValueChange(focusedInput, prevValues[focusedInput]);
+            }
+        }
+
+        
+    const handleKeyButtonPress = (btn) => {
+        buttonsRef.current[btn].click();
+        // add a click animation 
+        buttonsRef.current[btn].classList.add("ring-2", "ring-purple-400");
+        //remove after 2ms
+        setTimeout(() => {
+            buttonsRef.current[btn].classList.remove("ring-2", "ring-purple-400");
+        }, 200);
+    };
+
+    const handleKeyPress = (e) => {
+        if(buttonsRef.current[e.key]) {
+            // if pressed key is from buttons
+            handleKeyButtonPress(e.key);
+        }
+
+        if(e.key === "ArrowUp") {
+            setFocusedInput(0);
+        }
+        if(e.key === "ArrowDown") {
+            setFocusedInput(1);
+        }
+    }
+
+    useEffect(() => {
+        document.addEventListener("keydown", handleKeyPress);
+        return () => {
+            document.removeEventListener("keydown", handleKeyPress); 
+        };
+    }, []);
 
     return (
     <div className='w-full '>
@@ -635,12 +714,16 @@ const Converter = () => {
                 <div className='flex w-full flex-col gap-1 rounded-lg'>
                     {
                         Object.keys(Buttons).map((key) => (
-                            <div className='flex gap-1 key={key}'>
+                            <div className='flex gap-1' key={key}>
                                 {
                                     Buttons[key].map((item) => (
                                         <Button
                                             key={item.value}
                                             className={"w-full" + " " + item.className || ""}
+                                            onClick ={() => handleButtonClick(item.value)}
+                                            ref = {(button) => {
+                                                buttonsRef.current[item.value] = button;
+                                            }}
                                         >
                                             {item.label}
                                         </Button>
