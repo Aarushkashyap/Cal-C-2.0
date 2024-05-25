@@ -1,6 +1,5 @@
-# Calculator App
-
-This project is a modern, responsive calculator app built with React. The app includes a standard calculator, a theme switcher, and a feature switcher for future extensions. It supports keyboard inputs and includes advanced functionalities such as handling unary operations, maintaining a calculation history, and displaying formatted numbers.
+# Cal-C-2.0
+This project is a modern, responsive calculator app built with React. The app includes a standard calculator, a theme switcher, and a feature switcher with a converter. It supports keyboard inputs and includes advanced functionalities such as handling unary operations, maintaining a calculation history, and displaying formatted numbers along with arrow key based swapping.
 
 ## Features
 
@@ -43,8 +42,9 @@ To get started with the calculator app, follow these steps:
 ## Usage
 
 1. **Calculator**: Use the calculator interface to perform calculations. The buttons support both mouse and keyboard inputs.
-2. **Theme Switcher**: Click the theme switcher button to toggle between light and dark modes.
-3. **Feature Switcher**: Use the feature switcher to toggle between the calculator and other features (such as a converter) as they are implemented.
+2. **Converter**: Use the converter interface to perform conversions between various measurement units. The buttons support both mouse and keyboard inputs.
+3. **Theme Switcher**: Click the theme switcher button to toggle between light and dark modes.
+4. **Feature Switcher**: Use the feature switcher to toggle between the calculator and a converter.
 
 ## Code Overview
 
@@ -52,10 +52,11 @@ To get started with the calculator app, follow these steps:
 
 - **App.js**: The main component that includes the layout, theme switcher, and feature switcher.
 - **Calculator.js**: The calculator component that handles all calculator functionalities.
+- **Converter.js**: The converter component that handles all converter functionalities.
 
 ### Button Configuration
 
-The calculator buttons are configured in the `Buttons` object within `Calculator.js`. Each button has properties such as `value`, `label`, `className`, and `type`.
+The calculator buttons are configured in the `Buttons` object within `Calculator.js` and `Converter.js`. Each button has properties such as `value`, `label`, `className`, and `type`.
 
 ### State Management
 
