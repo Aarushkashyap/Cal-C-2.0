@@ -513,25 +513,25 @@ const Converter = () => {
         }
 
         const handleValueChange = (index, value) => {
-            value = parseFloat(value);
+            if (value.endsWith(".")) {
+                let prevValues = [...values];
+                prevValues[index] = value;
+                setValues(prevValues);
+                return;
+            }
+            value = parseFloat(value) || 0; // Convert to number only if it is not just a decimal point
             let prevValues = [...values];
-
-            // update change value
-
-            prevValues[index] = value;
-
-            // update other value
-            let otherValue = (value * selectedUnits[index].value) / selectedUnits[1-index].value;
-
-            // limit decimal places
-            if(otherValue.toString().split(".")?.length > 8) {
+            prevValues[index] = value.toString();
+        
+            let otherValue = (value * selectedUnits[index].value) / selectedUnits[1 - index].value;
+        
+            if (otherValue.toString().split(".")[0]?.length > 8) {
                 otherValue = otherValue.toFixed(2);
             }
-
-            // if no other value set it to 0
+        
             otherValue = otherValue || 0;
-
-            prevValues[1-index] = otherValue;
+        
+            prevValues[1 - index] = otherValue.toString();
             setValues(prevValues);
         }
 
