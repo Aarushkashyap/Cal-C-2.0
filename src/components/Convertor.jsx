@@ -546,42 +546,32 @@ const Converter = () => {
 
         const handleButtonClick = (value) => {
             let prevValues = [...values];
-            switch(value) {
+            switch (value) {
                 case "AC":
-                    prevValues = [0,0];
+                    prevValues = ["0", "0"];
                     break;
                 case "swap":
                     handleSwapValues();
-                    break;
+                    return; // Return early as we don't need to setValues or handleValueChange in this case
                 case "Backspace":
-                    // remove last character from focused input 
-                    prevValues[focusedInput] = (prevValues[focusedInput]+ "").slice(0, -1) || 0;  
-                    // if last character is dot remove it also
-                    if(prevValues[focusedInput].toString().slice(-1)==="."){
-                        prevValues[focusedInput]=(prevValues[focusedInput]+"").slice(
-                            0, 
-                            -1
-                        );
-                    }       
-                    break;  
-                case "." : 
-                    if(!prevValues[focusedInput].toString().includes(".")) {
-                        // if dot not already exists add one
+                    prevValues[focusedInput] = prevValues[focusedInput].slice(0, -1) || "0";
+                    break;
+                case ".":
+                    if (!prevValues[focusedInput].includes(".")) {
                         prevValues[focusedInput] += ".";
                     }
                     break;
                 default:
-                    prevValues[focusedInput] += value;
-                    prevValues[focusedInput] = prevValues[focusedInput] || 0;
+                    if (prevValues[focusedInput] === "0") {
+                        prevValues[focusedInput] = value;
+                    } else {
+                        prevValues[focusedInput] += value;
+                    }
                     break;
             }
-
-            if(value != "swap"){
-                setValues(prevValues);
-                handleValueChange(focusedInput, prevValues[focusedInput]);
-            }
+            setValues(prevValues);
+            handleValueChange(focusedInput, prevValues[focusedInput]);
         }
-
         
     const handleKeyButtonPress = (btn) => {
         buttonsRef.current[btn].click();
