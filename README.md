@@ -1,4 +1,5 @@
-# Cal-C-2.0
+[![Typing SVG](https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2000&pause=1000&vCenter=true&random=false&width=435&lines=Cal-C-2.0;A+calculator+and+converter)](https://cal-c-2.netlify.app/)
+
 This project is a modern, responsive calculator app built with React. The app includes a standard calculator, a theme switcher, and a feature switcher with a converter. It supports keyboard inputs and includes advanced functionalities such as handling unary operations, maintaining a calculation history, and displaying formatted numbers along with arrow key based swapping.
 
 Live code At: [Cal-C-2.0](https://cal-c-2.netlify.app/)
